@@ -1,0 +1,113 @@
+# Recommendation Prompt Templates v1.0.0
+# Purpose: Understand which brands LLMs recommend and why
+
+version: "1.0.0"
+type: recommendation
+description: "Templates for recommendation queries where users seek advice on what to choose"
+
+templates:
+  # Direct recommendations
+  - id: rec_should_use
+    name: "What Should I Use"
+    template: |
+      What {keyword} should I use? I'm looking for a reliable solution. What would you recommend and why?
+    expected_format: paragraph
+    use_case: "Direct recommendation request"
+
+  - id: rec_best_for_me
+    name: "Best For Me Query"
+    template: |
+      What's the best {keyword} for someone in the {industry} industry? I need something that's reliable and well-supported.
+    expected_format: paragraph
+    use_case: "Personalized recommendation"
+
+  - id: rec_recommend_for_startup
+    name: "Startup Recommendation"
+    template: |
+      Can you recommend a {keyword} solution for a startup? We need something that's affordable but can scale with us.
+    expected_format: paragraph
+    use_case: "Startup-focused recommendation"
+
+  - id: rec_recommend_enterprise
+    name: "Enterprise Recommendation"
+    template: |
+      What {keyword} would you recommend for an enterprise company? We need something robust, secure, and well-supported.
+    expected_format: paragraph
+    use_case: "Enterprise recommendation"
+
+  - id: rec_budget_friendly
+    name: "Budget Recommendation"
+    template: |
+      What's the best budget-friendly {keyword}? I'm looking for good value without sacrificing essential features.
+    expected_format: paragraph
+    use_case: "Cost-conscious recommendation"
+
+  - id: rec_premium
+    name: "Premium Recommendation"
+    template: |
+      What's the best premium {keyword} available? I want the highest quality solution regardless of price.
+    expected_format: paragraph
+    use_case: "Quality-focused recommendation"
+
+  - id: rec_easiest
+    name: "Easiest to Use"
+    template: |
+      What's the easiest {keyword} to use? I'm looking for something with a gentle learning curve and good documentation.
+    expected_format: paragraph
+    use_case: "Usability-focused recommendation"
+
+  - id: rec_most_reliable
+    name: "Most Reliable"
+    template: |
+      What's the most reliable {keyword}? I need something stable with good uptime and support.
+    expected_format: paragraph
+    use_case: "Reliability-focused recommendation"
+
+  - id: rec_top_pick
+    name: "Top Pick Query"
+    template: |
+      If you had to recommend just one {keyword} solution, what would it be and why?
+    expected_format: paragraph
+    use_case: "Single recommendation query"
+
+  - id: rec_trusted
+    name: "Most Trusted Query"
+    template: |
+      What's the most trusted {keyword} in the market? Which solution has the best reputation?
+    expected_format: paragraph
+    use_case: "Trust and reputation query"
+
+  - id: rec_innovative
+    name: "Most Innovative"
+    template: |
+      What's the most innovative {keyword} available? I'm interested in cutting-edge solutions with modern features.
+    expected_format: paragraph
+    use_case: "Innovation-focused recommendation"
+
+  - id: rec_industry_standard
+    name: "Industry Standard"
+    template: |
+      What's the industry standard for {keyword} in {industry}? What do most professionals in this field use?
+    expected_format: paragraph
+    use_case: "Industry norm discovery"
+
+  - id: rec_getting_started
+    name: "Getting Started Recommendation"
+    template: |
+      I'm just getting started with {keyword}. What solution would you recommend for a beginner?
+    expected_format: paragraph
+    use_case: "Beginner recommendation"
+
+  - id: rec_switch_from
+    name: "Switch Recommendation"
+    template: |
+      I'm looking to switch my {keyword} solution. What are the best options available now that I should consider?
+    expected_format: list
+    use_case: "Migration/switch recommendation"
+
+  - id: rec_specific_need
+    name: "Specific Need Recommendation"
+    template: |
+      I need a {keyword} that's particularly good for {industry} use cases. What would you suggest?
+    expected_format: paragraph
+    use_case: "Use-case specific recommendation"

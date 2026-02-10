@@ -1,0 +1,93 @@
+# Comparative Prompt Templates v1.0.0
+# Purpose: Understand how LLMs compare and rank brands/solutions
+
+version: "1.0.0"
+type: comparative
+description: "Templates for comparative queries that evaluate multiple options"
+
+templates:
+  # Direct comparison
+  - id: comp_vs_competitor
+    name: "Direct Comparison"
+    template: |
+      Compare {brand} vs {competitors} for {keyword}. What are the key differences, strengths, and weaknesses of each option?
+    expected_format: structured
+    use_case: "Head-to-head brand comparison"
+    requires_competitors: true
+
+  - id: comp_best_options
+    name: "Best Options Query"
+    template: |
+      What are the best options for {keyword}? Compare the top solutions available and explain what makes each one stand out.
+    expected_format: list
+    use_case: "Market landscape overview"
+
+  - id: comp_top_providers
+    name: "Top Providers Query"
+    template: |
+      Who are the top providers of {keyword}? Rank and compare them based on features, pricing, and reputation.
+    expected_format: list
+    use_case: "Provider ranking query"
+
+  - id: comp_alternatives
+    name: "Alternatives Query"
+    template: |
+      What are the best alternatives for {keyword}? List and compare different options that serve similar purposes.
+    expected_format: list
+    use_case: "Alternative discovery"
+
+  - id: comp_pros_cons
+    name: "Pros and Cons Analysis"
+    template: |
+      What are the pros and cons of different {keyword} solutions? Compare the main options available in the market.
+    expected_format: structured
+    use_case: "Balanced evaluation"
+
+  - id: comp_for_use_case
+    name: "Best For Use Case"
+    template: |
+      Which {keyword} solution is best for {industry} businesses? Compare the options that are most suitable for this industry.
+    expected_format: paragraph
+    use_case: "Industry-specific comparison"
+
+  - id: comp_pricing
+    name: "Pricing Comparison"
+    template: |
+      How do different {keyword} solutions compare in terms of pricing? What are the cost considerations for each major option?
+    expected_format: structured
+    use_case: "Price-focused comparison"
+
+  - id: comp_features
+    name: "Feature Comparison"
+    template: |
+      Compare the features of leading {keyword} solutions. Which ones offer the most comprehensive capabilities?
+    expected_format: structured
+    use_case: "Feature-focused comparison"
+
+  - id: comp_small_business
+    name: "Small Business Comparison"
+    template: |
+      What are the best {keyword} options for small businesses? Compare solutions that are suitable for smaller organizations with limited budgets.
+    expected_format: list
+    use_case: "SMB-focused comparison"
+
+  - id: comp_enterprise
+    name: "Enterprise Comparison"
+    template: |
+      What are the best enterprise-grade {keyword} solutions? Compare options suitable for large organizations with complex requirements.
+    expected_format: list
+    use_case: "Enterprise-focused comparison"
+
+  - id: comp_market_leaders
+    name: "Market Leaders Query"
+    template: |
+      Who are the market leaders in {keyword}? How do they compare to each other and what market share do they have?
+    expected_format: paragraph
+    use_case: "Market leadership analysis"
+
+  - id: comp_newcomers
+    name: "Emerging Players Query"
+    template: |
+      What are the emerging or innovative {keyword} solutions? Are there any newcomers challenging the established players?
+    expected_format: list
+    use_case: "Emerging competitor discovery"

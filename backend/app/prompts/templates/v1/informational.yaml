@@ -1,0 +1,78 @@
+# Informational Prompt Templates v1.0.0
+# Purpose: Gather information about how LLMs describe topics and brands
+
+version: "1.0.0"
+type: informational
+description: "Templates for informational queries that seek factual answers about topics, products, or services"
+
+templates:
+  # Basic "What is" questions
+  - id: info_what_is
+    name: "What Is Query"
+    template: |
+      What is {keyword}? Please provide a comprehensive overview including key features, benefits, and notable providers or solutions in this space.
+    expected_format: paragraph
+    use_case: "General awareness queries about a topic"
+
+  - id: info_how_does_work
+    name: "How Does It Work"
+    template: |
+      How does {keyword} work? Explain the key concepts, mechanisms, and typical implementation approaches.
+    expected_format: paragraph
+    use_case: "Understanding functionality and mechanisms"
+
+  - id: info_explain_for_beginner
+    name: "Beginner Explanation"
+    template: |
+      Can you explain {keyword} in simple terms for someone new to the {industry} industry? What are the most important things to know?
+    expected_format: paragraph
+    use_case: "Educational content for newcomers"
+
+  - id: info_key_features
+    name: "Key Features Query"
+    template: |
+      What are the key features and capabilities to look for in {keyword}? List the most important aspects that differentiate solutions in this space.
+    expected_format: list
+    use_case: "Feature discovery and comparison criteria"
+
+  - id: info_use_cases
+    name: "Use Cases Query"
+    template: |
+      What are the main use cases for {keyword}? Describe practical applications and scenarios where this would be valuable.
+    expected_format: list
+    use_case: "Understanding practical applications"
+
+  - id: info_industry_specific
+    name: "Industry Context Query"
+    template: |
+      In the context of {industry}, what role does {keyword} play? Who are the leading providers and what solutions are commonly used?
+    expected_format: paragraph
+    use_case: "Industry-specific information gathering"
+
+  - id: info_benefits
+    name: "Benefits Query"
+    template: |
+      What are the main benefits of using {keyword}? How can it help businesses or individuals achieve their goals?
+    expected_format: list
+    use_case: "Value proposition discovery"
+
+  - id: info_challenges
+    name: "Challenges Query"
+    template: |
+      What are the common challenges or considerations when implementing {keyword}? What should organizations be aware of?
+    expected_format: list
+    use_case: "Risk and challenge awareness"
+
+  - id: info_getting_started
+    name: "Getting Started Query"
+    template: |
+      How do I get started with {keyword}? What are the first steps, resources, or tools I should look into?
+    expected_format: structured
+    use_case: "Actionable guidance for beginners"
+
+  - id: info_trends
+    name: "Trends Query"
+    template: |
+      What are the current trends in {keyword}? How is this space evolving and what innovations are emerging?
+    expected_format: paragraph
+    use_case: "Market and technology trends"
