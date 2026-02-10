@@ -233,7 +233,7 @@ export default function DashboardPage() {
                   {saivData?.trend_direction === "up" ? <TrendingUp className="h-4 w-4" /> :
                    saivData?.trend_direction === "down" ? <TrendingDown className="h-4 w-4" /> :
                    <Minus className="h-4 w-4" />}
-                  {saivData?.saiv_delta > 0 ? "+" : ""}{saivData?.saiv_delta?.toFixed(1)}% vs last week
+                  {(saivData?.saiv_delta ?? 0) > 0 ? "+" : ""}{saivData?.saiv_delta?.toFixed(1)}% vs last week
                 </p>
               </div>
               <div className="text-right">
