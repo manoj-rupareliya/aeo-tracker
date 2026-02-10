@@ -1,0 +1,33 @@
+# Render.com Blueprint for llmrefs.com Backend
+# Deploy with: https://render.com/deploy
+
+services:
+  - type: web
+    name: llmrefs-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PORT
+        value: 8000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: llmrefs-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://frontend-sigma-three-40.vercel.app,http://localhost:3000
+    healthCheckPath: /health
+    plan: free
+    region: oregon
+
+databases:
+  - name: llmrefs-db
+    plan: free
+    region: oregon

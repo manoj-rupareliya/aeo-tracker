@@ -3,24 +3,41 @@ Redis cache utilities
 """
 
 import json
+import os
 from datetime import timedelta
 from typing import Any, Optional
 
-import redis.asyncio as redis
-from redis.asyncio.connection import ConnectionPool
-
 from app.config import get_settings
 
-settings = get_settings()
+# Check if Redis is available
+REDIS_AVAILABLE = False
+redis = None
+ConnectionPool = None
+
+try:
+    import redis.asyncio as redis_module
+    from redis.asyncio.connection import ConnectionPool as CP
+    redis = redis_module
+    ConnectionPool = CP
+    REDIS_AVAILABLE = True
+except ImportError:
+    pass
+
+def _get_settings():
+    """Lazy settings loader"""
+    return get_settings()
 
 # Connection pool
-_pool: Optional[ConnectionPool] = None
+_pool = None
 
 
-async def get_redis_pool() -> ConnectionPool:
+async def get_redis_pool():
     """Get or create Redis connection pool"""
     global _pool
+    if not REDIS_AVAILABLE:
+        return None
     if _pool is None:
+        settings = _get_settings()
         _pool = ConnectionPool.from_url(
             settings.REDIS_URL,
             max_connections=20,
@@ -29,16 +46,20 @@ async def get_redis_pool() -> ConnectionPool:
     return _pool
 
 
-async def get_redis() -> redis.Redis:
+async def get_redis():
     """Get Redis client"""
+    if not REDIS_AVAILABLE:
+        return None
     pool = await get_redis_pool()
+    if pool is None:
+        return None
     return redis.Redis(connection_pool=pool)
 
 
 async def close_redis():
     """Close Redis connections"""
     global _pool
-    if _pool is not None:
+    if _pool is not None and REDIS_AVAILABLE:
         await _pool.disconnect()
         _pool = None
 
@@ -56,6 +77,8 @@ class CacheService:
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
         client = await get_redis()
+        if client is None:
+            return None
         value = await client.get(self._key(key))
         if value is None:
             return None
@@ -72,7 +95,10 @@ class CacheService:
     ) -> bool:
         """Set value in cache with optional TTL (seconds)"""
         client = await get_redis()
+        if client is None:
+            return False
         if ttl is None:
+            settings = _get_settings()
             ttl = settings.REDIS_CACHE_TTL
 
         if isinstance(value, (dict, list)):
@@ -83,21 +109,29 @@ class CacheService:
     async def delete(self, key: str) -> bool:
         """Delete value from cache"""
         client = await get_redis()
+        if client is None:
+            return False
         return await client.delete(self._key(key)) > 0
 
     async def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
         client = await get_redis()
+        if client is None:
+            return False
         return await client.exists(self._key(key)) > 0
 
     async def get_ttl(self, key: str) -> int:
         """Get remaining TTL for key"""
         client = await get_redis()
+        if client is None:
+            return -1
         return await client.ttl(self._key(key))
 
     async def increment(self, key: str, amount: int = 1) -> int:
         """Increment a counter"""
         client = await get_redis()
+        if client is None:
+            return 0
         return await client.incrby(self._key(key), amount)
 
     async def set_with_lock(
@@ -109,6 +143,8 @@ class CacheService:
     ) -> bool:
         """Set value only if key doesn't exist (for distributed locking)"""
         client = await get_redis()
+        if client is None:
+            return False
         lock_key = f"{self._key(key)}:lock"
 
         # Try to acquire lock
@@ -173,6 +209,9 @@ class RateLimitCache(CacheService):
         Returns (is_allowed, remaining_requests)
         """
         client = await get_redis()
+        if client is None:
+            # No Redis, allow all requests
+            return True, limit
         key = self._key(identifier)
 
         current = await client.get(key)
@@ -195,6 +234,8 @@ class RateLimitCache(CacheService):
     ) -> int:
         """Get remaining requests in current window"""
         client = await get_redis()
+        if client is None:
+            return limit
         key = self._key(identifier)
         current = await client.get(key)
         if current is None:

@@ -37,12 +37,15 @@ COPY . .
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
+# Environment variable for port (Fly.io uses 8080, default 8000)
+ENV PORT=8000
+
 # Expose port
-EXPOSE 8000
+EXPOSE 8080
 
-# Health check
+# Health check - use PORT variable
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Default command (override for workers)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command using shell form to expand PORT variable
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
