@@ -32,10 +32,10 @@ class UserRole(str, PyEnum):
 
 
 class SubscriptionTier(str, PyEnum):
-    FREE = "free"
-    STARTER = "starter"
-    PROFESSIONAL = "professional"
-    ENTERPRISE = "enterprise"
+    FREE = "FREE"
+    STARTER = "STARTER"
+    PROFESSIONAL = "PROFESSIONAL"
+    ENTERPRISE = "ENTERPRISE"
 
 
 class IndustryCategory(str, PyEnum):
