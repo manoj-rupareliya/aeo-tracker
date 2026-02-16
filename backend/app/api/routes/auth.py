@@ -26,6 +26,12 @@ router = APIRouter()
 settings = get_settings()
 
 
+@router.get("/debug")
+async def debug_endpoint():
+    """Debug endpoint to verify deployment"""
+    return {"status": "ok", "version": "v2-debug", "timestamp": datetime.utcnow().isoformat()}
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserCreate,
