@@ -33,8 +33,13 @@ class BrandResponse(BaseModel):
     id: UUID
     name: str
     is_primary: bool
-    aliases: List[str]
+    aliases: List[str] = []
     created_at: datetime
+
+    @field_validator("aliases", mode="before")
+    @classmethod
+    def ensure_aliases_list(cls, v):
+        return v if v is not None else []
 
     class Config:
         from_attributes = True
@@ -59,11 +64,36 @@ class CompetitorResponse(BaseModel):
     id: UUID
     name: str
     domain: Optional[str]
-    aliases: List[str]
+    aliases: List[str] = []
     created_at: datetime
+
+    @field_validator("aliases", mode="before")
+    @classmethod
+    def ensure_aliases_list(cls, v):
+        return v if v is not None else []
 
     class Config:
         from_attributes = True
+
+
+# Valid country codes
+VALID_COUNTRIES = [
+    "in",  # India
+    "us",  # United States
+    "uk",  # United Kingdom
+    "au",  # Australia
+    "ca",  # Canada
+    "de",  # Germany
+    "fr",  # France
+    "jp",  # Japan
+    "sg",  # Singapore
+    "ae",  # UAE
+    "br",  # Brazil
+    "mx",  # Mexico
+    "nl",  # Netherlands
+    "es",  # Spain
+    "it",  # Italy
+]
 
 
 class ProjectCreate(BaseModel):
@@ -72,12 +102,21 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = None
     domain: str = Field(..., min_length=1, max_length=255)
     industry: str = Field(default="other")
+    country: str = Field(default="in")  # Target country for all analysis
     enabled_llms: List[str] = ["openai", "anthropic", "google", "perplexity"]
     crawl_frequency_days: int = Field(default=7, ge=1, le=30)
 
     # Initial brands and competitors
     brands: List[BrandCreate] = []
     competitors: List[CompetitorCreate] = []
+
+    @field_validator("country")
+    @classmethod
+    def validate_country(cls, v: str) -> str:
+        v = v.lower().strip()
+        if v not in VALID_COUNTRIES:
+            raise ValueError(f"Country must be one of: {', '.join(VALID_COUNTRIES)}")
+        return v
 
     @field_validator("industry")
     @classmethod
@@ -120,9 +159,20 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     industry: Optional[str] = None
+    country: Optional[str] = None  # Target country for all analysis
     enabled_llms: Optional[List[str]] = None
     crawl_frequency_days: Optional[int] = Field(None, ge=1, le=30)
     is_active: Optional[bool] = None
+
+    @field_validator("country")
+    @classmethod
+    def validate_country(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        v = v.lower().strip()
+        if v not in VALID_COUNTRIES:
+            raise ValueError(f"Country must be one of: {', '.join(VALID_COUNTRIES)}")
+        return v
 
 
 class ProjectResponse(BaseModel):
@@ -132,6 +182,7 @@ class ProjectResponse(BaseModel):
     description: Optional[str]
     domain: str
     industry: str
+    country: str = "in"  # Target country for all analysis
     enabled_llms: List[str]
     crawl_frequency_days: int
     last_crawl_at: Optional[datetime]

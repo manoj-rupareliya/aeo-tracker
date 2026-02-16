@@ -1,4 +1,4 @@
-# llmrefs.com
+# llmscm.com
 
 ## LLM Visibility & GEO Intelligence Platform
 
@@ -6,7 +6,7 @@ A production-ready B2B SaaS platform for tracking how Large Language Models (Cha
 
 **Core Philosophy: GEO-First (Generative Engine Optimization)**
 
-Unlike traditional SEO that optimizes for search rankings, llmrefs.com helps you optimize for AI-generated responses. As LLMs become primary information interfaces, knowing how they perceive and recommend your brand is critical.
+Unlike traditional SEO that optimizes for search rankings, llmscm.com helps you optimize for AI-generated responses. As LLMs become primary information interfaces, knowing how they perceive and recommend your brand is critical.
 
 ---
 
@@ -57,7 +57,7 @@ Caching infrastructure reduces operational costs over time. Each cached response
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              LLMREFS.COM V2                                      │
+│                              LLMSCM.COM V2                                      │
 │                   LLM Visibility & GEO Intelligence Platform                    │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
@@ -391,7 +391,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/llmrefs
+      - DATABASE_URL=postgresql://user:pass@db:5432/llmscm
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db
@@ -436,4 +436,4 @@ Proprietary - All rights reserved.
 
 ## Support
 
-For issues and feature requests, contact support@llmrefs.com
+For issues and feature requests, contact support@llmscm.com

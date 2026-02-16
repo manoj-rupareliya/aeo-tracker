@@ -35,7 +35,7 @@ def create_sample_data(db: Session):
     # Create user
     user = User(
         id=uuid4(),
-        email="demo@llmrefs.com",
+        email="demo@llmscm.com",
         password_hash=hash_password("Demo1234!"),
         full_name="Demo User",
         subscription_tier="professional",
@@ -411,7 +411,7 @@ For more information, you can check reviews on G2 or the official documentation 
 
     print("\nSeed data created successfully!")
     print(f"\n  Login credentials:")
-    print(f"    Email: demo@llmrefs.com")
+    print(f"    Email: demo@llmscm.com")
     print(f"    Password: Demo1234!")
 
 
@@ -425,7 +425,7 @@ def main():
 
     with Session(engine) as db:
         # Check if data already exists
-        existing_user = db.query(User).filter(User.email == "demo@llmrefs.com").first()
+        existing_user = db.query(User).filter(User.email == "demo@llmscm.com").first()
         if existing_user:
             print("Sample data already exists. Skipping seed.")
             return

@@ -1,6 +1,6 @@
-# fly.toml - Configuration for llmrefs.com backend API
+# fly.toml - Configuration for llmscm.com backend API
 
-app = "llmrefs-api"
+app = "llmscm-api"
 primary_region = "iad"
 
 [build]

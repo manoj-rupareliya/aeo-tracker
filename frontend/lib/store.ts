@@ -21,6 +21,7 @@ interface Project {
   name: string;
   domain: string;
   industry: string;
+  country?: string;  // Optional for backwards compatibility
   enabled_llms: string[];
   brands: { id: string; name: string; is_primary: boolean }[];
   competitors: { id: string; name: string }[];
@@ -78,24 +79,32 @@ interface ProjectState {
   updateProject: (projectId: string, updates: Partial<Project>) => void;
 }
 
-export const useProjectStore = create<ProjectState>()((set) => ({
-  currentProject: null,
-  projects: [],
+export const useProjectStore = create<ProjectState>()(
+  persist(
+    (set) => ({
+      currentProject: null,
+      projects: [],
 
-  setCurrentProject: (project) => set({ currentProject: project }),
-  setProjects: (projects) => set({ projects }),
+      setCurrentProject: (project) => set({ currentProject: project }),
+      setProjects: (projects) => set({ projects }),
 
-  updateProject: (projectId, updates) =>
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === projectId ? { ...p, ...updates } : p
-      ),
-      currentProject:
-        state.currentProject?.id === projectId
-          ? { ...state.currentProject, ...updates }
-          : state.currentProject,
-    })),
-}));
+      updateProject: (projectId, updates) =>
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId ? { ...p, ...updates } : p
+          ),
+          currentProject:
+            state.currentProject?.id === projectId
+              ? { ...state.currentProject, ...updates }
+              : state.currentProject,
+        })),
+    }),
+    {
+      name: "project-storage",
+      partialize: (state) => ({ currentProject: state.currentProject, projects: state.projects }),
+    }
+  )
+);
 
 // UI Store
 interface UIState {

@@ -12,7 +12,7 @@ settings = get_settings()
 
 # Create Celery app
 celery_app = Celery(
-    "llmrefs",
+    "llmscm",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
     include=[

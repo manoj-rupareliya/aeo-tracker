@@ -8,7 +8,7 @@ export default function Home() {
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-primary-600">llmrefs</span>
+              <span className="text-2xl font-bold text-primary-600">llmscm</span>
               <span className="text-2xl font-light text-gray-400">.com</span>
             </div>
             <div className="flex items-center gap-4">
@@ -144,7 +144,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <span className="text-xl font-bold text-primary-600">llmrefs</span>
+              <span className="text-xl font-bold text-primary-600">llmscm</span>
               <span className="text-xl font-light text-gray-400">.com</span>
             </div>
             <p className="text-sm text-gray-500">

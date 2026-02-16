@@ -1,10 +1,10 @@
-# llmrefs.com V2 - Enterprise Architecture
+# llmscm.com V2 - Enterprise Architecture
 
 ## Evolution: From Response Tracker to Intelligence System
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              LLMREFS.COM V2                                      │
+│                              LLMSCM.COM V2                                      │
 │                   LLM Visibility & GEO Intelligence Platform                    │
 └─────────────────────────────────────────────────────────────────────────────────┘
 

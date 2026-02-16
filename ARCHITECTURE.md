@@ -1,4 +1,4 @@
-# llmrefs.com - System Architecture
+# llmscm.com - System Architecture
 
 ## Architecture Diagram (Text-Based)
 

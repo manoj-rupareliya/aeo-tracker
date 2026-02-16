@@ -10,9 +10,10 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Keyword, Project, Prompt, LLMRun, User
+from app.models.visibility import KeywordAnalysisResult
 from app.schemas.keyword import (
     KeywordCreate, KeywordBulkCreate, KeywordUpdate,
-    KeywordResponse, KeywordListResponse
+    KeywordResponse, KeywordListResponse, KeywordAnalysisSummary
 )
 from app.utils import get_db
 from app.api.middleware.auth import get_current_user
@@ -45,7 +46,7 @@ async def create_keyword(
     await db.commit()
     await db.refresh(keyword)
 
-    return _keyword_to_response(keyword, db)
+    return await _keyword_to_response(keyword, db)
 
 
 @router.post("/{project_id}/bulk", response_model=List[KeywordResponse], status_code=status.HTTP_201_CREATED)
@@ -256,6 +257,42 @@ async def _keyword_to_response(keyword: Keyword, db: AsyncSession) -> KeywordRes
     )
     last_run = result.scalar_one_or_none()
 
+    # Get latest keyword analysis result
+    latest_analysis = None
+    analysis_result = await db.execute(
+        select(KeywordAnalysisResult)
+        .where(KeywordAnalysisResult.keyword_id == keyword.id)
+        .order_by(KeywordAnalysisResult.created_at.desc())
+        .limit(1)
+    )
+    analysis = analysis_result.scalar_one_or_none()
+
+    if analysis:
+        # Extract top brands from competitors_mentioned
+        top_brands = []
+        if analysis.competitors_mentioned:
+            for comp in analysis.competitors_mentioned[:5]:
+                if isinstance(comp, dict) and 'name' in comp:
+                    top_brands.append(comp['name'])
+                elif isinstance(comp, str):
+                    top_brands.append(comp)
+
+        latest_analysis = KeywordAnalysisSummary(
+            brand_mentioned=analysis.brand_mentioned or False,
+            brand_position=analysis.brand_position,
+            total_brands_found=analysis.total_brands_mentioned or 0,
+            total_citations=analysis.total_citations or 0,
+            our_domain_cited=analysis.our_domain_cited or False,
+            visibility_score=float(analysis.total_visibility_score or 0),
+            top_brands=top_brands,
+            provider=analysis.provider.value if analysis.provider else None,
+            analyzed_at=analysis.created_at,
+            # AIO fields
+            has_aio=getattr(analysis, 'has_aio', True),
+            brand_in_aio=getattr(analysis, 'brand_in_aio', False) or (analysis.brand_mentioned or False),
+            domain_in_aio=getattr(analysis, 'domain_in_aio', False) or (analysis.our_domain_cited or False),
+        )
+
     return KeywordResponse(
         id=keyword.id,
         keyword=keyword.keyword,
@@ -268,4 +305,5 @@ async def _keyword_to_response(keyword: Keyword, db: AsyncSession) -> KeywordRes
         run_count=run_count,
         avg_visibility_score=float(avg_score) if avg_score else None,
         last_run_at=last_run,
+        latest_analysis=latest_analysis,
     )

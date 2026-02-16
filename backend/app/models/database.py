@@ -1,5 +1,5 @@
 """
-llmrefs.com Database Models
+llmscm.com Database Models
 PostgreSQL with SQLAlchemy ORM
 """
 
@@ -170,6 +170,9 @@ class Project(Base):
 
     # Industry for prompt context
     industry = Column(Enum(IndustryCategory), default=IndustryCategory.OTHER)
+
+    # Target country for all analysis (LLM queries, AIO, SERP)
+    country = Column(String(10), default="in", nullable=True)  # ISO country code, nullable for backwards compatibility
 
     # LLM configuration
     enabled_llms = Column(ARRAY(String), default=["openai", "anthropic", "google", "perplexity"])

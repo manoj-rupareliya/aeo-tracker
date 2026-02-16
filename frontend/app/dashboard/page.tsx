@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScoreChart } from "@/components/charts/score-chart";
 import { LLMBreakdownChart } from "@/components/charts/llm-breakdown-chart";
-import { dashboardApi, projectsApi } from "@/lib/api";
+import { dashboardApi, projectsApi, llmApi, keywordsApi } from "@/lib/api";
 import { useProjectStore } from "@/lib/store";
 import {
   formatScore,
@@ -27,12 +27,19 @@ import {
   BarChart3,
   Lightbulb,
   Activity,
+  X,
+  Check,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const { currentProject, setCurrentProject, projects, setProjects } = useProjectStore();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState<"idle" | "running" | "success" | "error">("idle");
+  const [analysisMessage, setAnalysisMessage] = useState("");
+  const queryClient = useQueryClient();
 
   // Fetch projects if not loaded
   const { data: projectsData } = useQuery({
@@ -160,11 +167,56 @@ export default function DashboardPage() {
     enabled: !!selectedProjectId,
   });
 
+  // Run Analysis mutation - uses sync endpoint for local development
+  const runAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedProjectId) throw new Error("No project selected");
+
+      // First get all keywords for this project
+      const keywordsResponse = await keywordsApi.list(selectedProjectId, 1, 100);
+      const keywords = keywordsResponse.data?.items || [];
+
+      if (keywords.length === 0) {
+        throw new Error("No keywords found. Please add keywords first before running analysis.");
+      }
+
+      // Execute LLM analysis using sync endpoint (no Celery required)
+      const keywordIds = keywords.map((k: any) => k.id);
+      const response = await llmApi.executeSync(selectedProjectId, {
+        keyword_ids: keywordIds,
+        provider: "openai",  // Use OpenAI for sync mode
+      });
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      setAnalysisStatus("success");
+      const resultsCount = data?.results?.length || 0;
+      setAnalysisMessage(`Analysis completed! Processed ${resultsCount} keywords.`);
+      // Refresh dashboard data
+      queryClient.invalidateQueries({ queryKey: ["dashboard-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["llm-breakdown"] });
+      queryClient.invalidateQueries({ queryKey: ["time-series"] });
+    },
+    onError: (error: any) => {
+      setAnalysisStatus("error");
+      const errorMessage = error.response?.data?.detail || error.message || "Failed to run analysis. Please try again.";
+      setAnalysisMessage(errorMessage);
+    },
+  });
+
+  const handleRunAnalysis = () => {
+    setShowAnalysisModal(true);
+    setAnalysisStatus("running");
+    setAnalysisMessage("Starting analysis...");
+    runAnalysisMutation.mutate();
+  };
+
   if (!projects.length) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Welcome to llmrefs.com
+          Welcome to llmscm.com
         </h2>
         <p className="text-gray-600 mb-6">
           Create your first project to start tracking LLM visibility.
@@ -208,12 +260,79 @@ export default function DashboardPage() {
               Audit Trail
             </Button>
           </Link>
-          <Button>
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button onClick={handleRunAnalysis} disabled={runAnalysisMutation.isPending}>
+            {runAnalysisMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
             Run Analysis
           </Button>
         </div>
       </div>
+
+      {/* Analysis Modal */}
+      {showAnalysisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => analysisStatus !== "running" && setShowAnalysisModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => analysisStatus !== "running" && setShowAnalysisModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={analysisStatus === "running"}
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="text-center">
+              {analysisStatus === "running" && (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <Loader2 className="h-8 w-8 text-white animate-spin" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Running Analysis</h3>
+                  <p className="text-gray-500">{analysisMessage}</p>
+                  <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-600 rounded-full animate-pulse w-2/3" />
+                  </div>
+                </>
+              )}
+
+              {analysisStatus === "success" && (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+                    <Check className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Analysis Queued!</h3>
+                  <p className="text-gray-500">{analysisMessage}</p>
+                  <p className="text-sm text-gray-400 mt-2">Results will appear on the dashboard as they complete.</p>
+                  <Button onClick={() => setShowAnalysisModal(false)} className="mt-6">
+                    Got it
+                  </Button>
+                </>
+              )}
+
+              {analysisStatus === "error" && (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/30">
+                    <X className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Analysis Failed</h3>
+                  <p className="text-gray-500">{analysisMessage}</p>
+                  <div className="flex gap-3 justify-center mt-6">
+                    <Button variant="outline" onClick={() => setShowAnalysisModal(false)}>
+                      Close
+                    </Button>
+                    <Button onClick={handleRunAnalysis}>
+                      Try Again
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* V2 Key Metrics - SAIV Prominent */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

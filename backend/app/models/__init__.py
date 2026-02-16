@@ -1,5 +1,5 @@
 """
-Database Models for llmrefs.com
+Database Models for llmscm.com
 """
 
 from .database import (
@@ -34,6 +34,26 @@ from .database import (
     ScheduledJob,
 )
 
+from .visibility import (
+    # Enums
+    MentionType,
+    CitationPurpose,
+    OutreachStatus,
+    ContentGapType,
+    # Models
+    FanOutQuery,
+    ShoppingRecommendation,
+    CitationDetail,
+    ShareOfVoice,
+    PositionTracking,
+    PromptVolumeEstimate,
+    OutreachOpportunity,
+    ContentGap,
+    KeywordAnalysisResult,
+    ExtractedEntity,
+    AIOResult,
+)
+
 __all__ = [
     "Base",
     # Enums
@@ -46,7 +66,11 @@ __all__ = [
     "SentimentPolarity",
     "SourceCategory",
     "JobPriority",
-    # Models
+    "MentionType",
+    "CitationPurpose",
+    "OutreachStatus",
+    "ContentGapType",
+    # Core Models
     "User",
     "UserAPIKey",
     "Project",
@@ -64,4 +88,16 @@ __all__ = [
     "AggregatedScore",
     "AuditLog",
     "ScheduledJob",
+    # Visibility Models
+    "FanOutQuery",
+    "ShoppingRecommendation",
+    "CitationDetail",
+    "ShareOfVoice",
+    "PositionTracking",
+    "PromptVolumeEstimate",
+    "OutreachOpportunity",
+    "ContentGap",
+    "KeywordAnalysisResult",
+    "ExtractedEntity",
+    "AIOResult",
 ]

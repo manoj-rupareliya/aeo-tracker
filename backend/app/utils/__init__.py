@@ -1,5 +1,5 @@
 """
-Utility modules for llmrefs.com
+Utility modules for llmscm.com
 """
 
 from .database import (

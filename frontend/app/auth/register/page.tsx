@@ -54,7 +54,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex justify-center items-center">
-          <span className="text-3xl font-bold text-primary-600">llmrefs</span>
+          <span className="text-3xl font-bold text-primary-600">llmscm</span>
           <span className="text-3xl font-light text-gray-400">.com</span>
         </Link>
         <h2 className="mt-6 text-center text-2xl font-bold text-gray-900">

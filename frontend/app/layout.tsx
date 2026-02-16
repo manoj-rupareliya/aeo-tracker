@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "llmrefs.com - LLM Visibility & Citation Intelligence",
+  title: "llmscm.com - LLM Visibility & Citation Intelligence",
   description:
     "Track how LLMs mention your brand, see which sources they cite, and measure visibility over time.",
   keywords: ["LLM", "AI", "SEO", "GEO", "Brand Visibility", "Citation Tracking"],

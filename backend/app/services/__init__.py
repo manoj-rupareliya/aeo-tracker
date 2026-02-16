@@ -10,6 +10,9 @@ from .graph_service import PreferenceGraphEngine
 from .recommendation_service import GEORecommendationEngine
 from .saiv_service import SAIVEngine
 from .cost_service import CostGovernanceService
+from .visibility_analyzer import VisibilityAnalyzer
+from .sov_calculator import ShareOfVoiceCalculator
+from .citation_extractor import CitationExtractor
 
 __all__ = [
     "PromptEngine",
@@ -20,4 +23,7 @@ __all__ = [
     "GEORecommendationEngine",
     "SAIVEngine",
     "CostGovernanceService",
+    "VisibilityAnalyzer",
+    "ShareOfVoiceCalculator",
+    "CitationExtractor",
 ]

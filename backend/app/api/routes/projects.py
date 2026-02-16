@@ -36,6 +36,7 @@ async def create_project(
         description=project_data.description,
         domain=project_data.domain,
         industry=project_data.industry,
+        country=project_data.country,
         enabled_llms=project_data.enabled_llms,
         crawl_frequency_days=project_data.crawl_frequency_days,
         next_crawl_at=datetime.utcnow() + timedelta(days=project_data.crawl_frequency_days),
@@ -165,6 +166,8 @@ async def update_project(
         project.description = project_data.description
     if project_data.industry is not None:
         project.industry = project_data.industry
+    if project_data.country is not None:
+        project.country = project_data.country
     if project_data.enabled_llms is not None:
         project.enabled_llms = project_data.enabled_llms
     if project_data.crawl_frequency_days is not None:
@@ -299,7 +302,7 @@ async def delete_competitor(
     await db.commit()
 
 
-def _project_to_response(project: Project) -> ProjectResponse:
+def _project_to_response(project: Project, keyword_count: int = 0, total_runs: int = 0) -> ProjectResponse:
     """Convert Project model to response schema"""
     return ProjectResponse(
         id=project.id,
@@ -307,6 +310,7 @@ def _project_to_response(project: Project) -> ProjectResponse:
         description=project.description,
         domain=project.domain,
         industry=project.industry,
+        country=project.country or "in",
         enabled_llms=project.enabled_llms,
         crawl_frequency_days=project.crawl_frequency_days,
         last_crawl_at=project.last_crawl_at,
@@ -316,6 +320,6 @@ def _project_to_response(project: Project) -> ProjectResponse:
         updated_at=project.updated_at,
         brands=[BrandResponse.model_validate(b) for b in project.brands],
         competitors=[CompetitorResponse.model_validate(c) for c in project.competitors],
-        keyword_count=len(project.keywords) if hasattr(project, "keywords") else 0,
-        total_runs=len(project.llm_runs) if hasattr(project, "llm_runs") else 0,
+        keyword_count=keyword_count,
+        total_runs=total_runs,
     )

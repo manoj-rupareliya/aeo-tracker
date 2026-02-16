@@ -67,7 +67,7 @@ async def close_redis():
 class CacheService:
     """Cache service for LLM responses and other data"""
 
-    def __init__(self, prefix: str = "llmrefs"):
+    def __init__(self, prefix: str = "llmscm"):
         self.prefix = prefix
 
     def _key(self, key: str) -> str:
@@ -166,7 +166,7 @@ class LLMResponseCache(CacheService):
     """Specialized cache for LLM responses"""
 
     def __init__(self):
-        super().__init__(prefix="llmrefs:llm_response")
+        super().__init__(prefix="llmscm:llm_response")
 
     async def get_response(self, cache_key: str) -> Optional[dict]:
         """Get cached LLM response"""
@@ -196,7 +196,7 @@ class RateLimitCache(CacheService):
     """Rate limiting with sliding window"""
 
     def __init__(self):
-        super().__init__(prefix="llmrefs:ratelimit")
+        super().__init__(prefix="llmscm:ratelimit")
 
     async def check_rate_limit(
         self,

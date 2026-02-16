@@ -30,6 +30,23 @@ class KeywordUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
+class KeywordAnalysisSummary(BaseModel):
+    """Summary of latest keyword analysis"""
+    brand_mentioned: bool = False
+    brand_position: Optional[int] = None
+    total_brands_found: int = 0
+    total_citations: int = 0
+    our_domain_cited: bool = False
+    visibility_score: float = 0
+    top_brands: List[str] = []
+    provider: Optional[str] = None
+    analyzed_at: Optional[datetime] = None
+    # AIO (AI Overview) fields
+    has_aio: bool = False  # Whether this query has an AI Overview
+    brand_in_aio: bool = False  # Whether our brand appears in the AIO
+    domain_in_aio: bool = False  # Whether our domain appears in the AIO
+
+
 class KeywordResponse(BaseModel):
     """Keyword response"""
     id: UUID
@@ -45,6 +62,9 @@ class KeywordResponse(BaseModel):
     run_count: int = 0
     avg_visibility_score: Optional[float] = None
     last_run_at: Optional[datetime] = None
+
+    # Latest analysis summary
+    latest_analysis: Optional[KeywordAnalysisSummary] = None
 
     class Config:
         from_attributes = True

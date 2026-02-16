@@ -1,5 +1,5 @@
 """
-llmrefs.com V2 - Extended Database Models
+llmscm.com V2 - Extended Database Models
 New tables for Trust & Audit, Drift Detection, Preference Graph, GEO Recommendations, SAIV
 """
 

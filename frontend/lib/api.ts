@@ -1,5 +1,5 @@
 /**
- * API Client for llmrefs.com
+ * API Client for llmscm.com
  */
 
 import axios, { AxiosInstance, AxiosError } from "axios";
@@ -12,6 +12,7 @@ const api: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     "Content-Type": "application/json",
+    "bypass-tunnel-reminder": "true", // For localtunnel
   },
 });
 
@@ -74,6 +75,15 @@ export const authApi = {
     api.post("/auth/refresh", { refresh_token: refreshToken }),
 
   getMe: () => api.get("/auth/me"),
+
+  // API Key management
+  listApiKeys: () => api.get("/auth/api-keys"),
+
+  saveApiKey: (data: { provider: string; api_key: string }) =>
+    api.post("/auth/api-keys", data),
+
+  deleteApiKey: (provider: string) =>
+    api.delete(`/auth/api-keys/${provider}`),
 };
 
 // Projects API
@@ -87,6 +97,7 @@ export const projectsApi = {
     name: string;
     domain: string;
     industry: string;
+    country?: string;
     brands?: { name: string; is_primary?: boolean; aliases?: string[] }[];
     competitors?: { name: string; domain?: string }[];
   }) => api.post("/projects", data),
@@ -151,6 +162,14 @@ export const llmApi = {
     force_refresh?: boolean;
   }) => api.post(`/llm/${projectId}/execute`, data),
 
+  // Synchronous execution for local development (no Celery/Redis required)
+  // Note: Country is now set at project level, no need to pass it
+  executeSync: (projectId: string, data: {
+    keyword_ids?: string[];
+    provider?: string;
+    providers?: string[];  // Multiple providers for parallel analysis
+  }) => api.post(`/llm/${projectId}/execute-sync`, data, { timeout: 180000 }),  // 3 min timeout for multiple providers
+
   listRuns: (projectId: string, params?: { status?: string; provider?: string; page?: number }) =>
     api.get(`/llm/${projectId}/runs`, { params }),
 
@@ -206,6 +225,114 @@ export const dashboardApi = {
 
   getTimeSeries: (projectId: string, metric = "visibility_score", granularity = "daily", days = 30) =>
     api.get(`/dashboard/${projectId}/time-series`, { params: { metric, granularity, days } }),
+};
+
+// Visibility Analytics API
+export const visibilityApi = {
+  // Dashboard
+  getDashboard: (projectId: string, days = 30) =>
+    api.get(`/visibility/dashboard/${projectId}`, { params: { days } }),
+
+  // Share of Voice
+  getShareOfVoice: (projectId: string, days = 30) =>
+    api.get(`/visibility/sov/${projectId}`, { params: { days } }),
+
+  getSovByKeyword: (projectId: string, days = 30) =>
+    api.get(`/visibility/sov/${projectId}/by-keyword`, { params: { days } }),
+
+  getSovByLlm: (projectId: string, days = 30) =>
+    api.get(`/visibility/sov/${projectId}/by-llm`, { params: { days } }),
+
+  // Position Tracking
+  getPositionSummary: (projectId: string, days = 30) =>
+    api.get(`/visibility/positions/${projectId}`, { params: { days } }),
+
+  getEntityRanking: (projectId: string, days = 30) =>
+    api.get(`/visibility/positions/${projectId}/ranking`, { params: { days } }),
+
+  // Citations
+  getCitationSummary: (projectId: string, days = 30) =>
+    api.get(`/visibility/citations/${projectId}`, { params: { days } }),
+
+  getCitationSources: (projectId: string, limit = 20) =>
+    api.get(`/visibility/citations/${projectId}/sources`, { params: { limit } }),
+
+  // Keyword Analysis
+  getKeywordAnalyses: (projectId: string, limit = 50) =>
+    api.get(`/visibility/analysis/${projectId}/keywords`, { params: { limit } }),
+
+  getKeywordAnalysisDetail: (projectId: string, keywordId: string) =>
+    api.get(`/visibility/analysis/${projectId}/keyword/${keywordId}`),
+
+  // Outreach Opportunities
+  getOutreachOpportunities: (projectId: string, status?: string, limit = 20) =>
+    api.get(`/visibility/opportunities/${projectId}`, { params: { status, limit } }),
+
+  generateOpportunities: (projectId: string, minCitations = 3) =>
+    api.post(`/visibility/opportunities/${projectId}/generate`, {}, { params: { min_citations: minCitations } }),
+
+  updateOpportunityStatus: (opportunityId: string, status: string, notes?: string) =>
+    api.patch(`/visibility/opportunities/${opportunityId}/status`, { status, notes }),
+
+  // Content Gaps
+  getContentGaps: (projectId: string, priority?: string, addressed = false, limit = 20) =>
+    api.get(`/visibility/gaps/${projectId}`, { params: { priority, addressed, limit } }),
+
+  detectContentGaps: (projectId: string) =>
+    api.post(`/visibility/gaps/${projectId}/detect`),
+
+  markGapAddressed: (gapId: string, addressedUrl: string) =>
+    api.patch(`/visibility/gaps/${gapId}/address`, { addressed_url: addressedUrl }),
+
+  // AI Prompt Volume
+  getPromptVolume: (projectId: string) =>
+    api.get(`/visibility/volume/${projectId}`),
+
+  generateVolumeEstimates: (projectId: string) =>
+    api.post(`/visibility/volume/${projectId}/estimate`),
+
+  getVolumeSummary: (projectId: string) =>
+    api.get(`/visibility/volume/${projectId}/summary`),
+
+  // Keyword Rankings
+  getKeywordRankings: (projectId: string, days = 30) =>
+    api.get(`/visibility/rankings/${projectId}`, { params: { days } }),
+
+  getKeywordRankingDetail: (projectId: string, keywordId: string, days = 30) =>
+    api.get(`/visibility/rankings/${projectId}/keyword/${keywordId}`, { params: { days } }),
+
+  // Keyword Ranking Results (who ranked in top positions with citations)
+  getKeywordRankingResults: (projectId: string, keywordId: string, days = 30) =>
+    api.get(`/visibility/ranking-results/${projectId}/keyword/${keywordId}`, { params: { days } }),
+
+  getAllRankingResults: (projectId: string, days = 30, limit = 50) =>
+    api.get(`/visibility/ranking-results/${projectId}`, { params: { days, limit } }),
+};
+
+// Google AI Overview (AIO) API
+export const aioApi = {
+  // Test API connection
+  testConnection: () => api.get("/aio/test"),
+
+  // Get AIO data for a specific keyword
+  // Note: Country is now set at project level
+  getForKeyword: (projectId: string, keywordId: string, forceRefresh = false) =>
+    api.get(`/aio/${projectId}/keyword/${keywordId}`, {
+      params: { force_refresh: forceRefresh }
+    }),
+
+  // Analyze multiple keywords for AIO
+  // Note: Country is now set at project level
+  analyzeBulk: (projectId: string, data: { keyword_ids?: string[] }) =>
+    api.post(`/aio/${projectId}/analyze-bulk`, data),
+
+  // Get AIO history for a keyword
+  getHistory: (projectId: string, keywordId: string, days = 30) =>
+    api.get(`/aio/${projectId}/history/${keywordId}`, { params: { days } }),
+
+  // Get AIO summary for project
+  getSummary: (projectId: string) =>
+    api.get(`/aio/${projectId}/summary`),
 };
 
 export default api;

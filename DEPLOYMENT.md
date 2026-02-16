@@ -1,8 +1,8 @@
-# Deployment Guide for llmrefs.com
+# Deployment Guide for llmscm.com
 
 ## Overview
 
-llmrefs.com consists of two main components:
+llmscm.com consists of two main components:
 - **Frontend**: Next.js 14 app deployed to Vercel
 - **Backend**: FastAPI + Celery deployed to Railway/Render/Fly.io
 
@@ -14,7 +14,7 @@ llmrefs.com consists of two main components:
 
 Ensure your repository structure is correct:
 ```
-llmrefs/
+llmscm/
 ├── frontend/           # Next.js app (deploy this folder)
 │   ├── app/
 │   ├── components/
@@ -40,7 +40,7 @@ In Vercel project settings, add these environment variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Backend API URL | `https://api.llmrefs.com` |
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `https://api.llmscm.com` |
 
 ### Step 4: Deploy
 
@@ -52,7 +52,7 @@ Click "Deploy". Vercel will automatically:
 ### Step 5: Custom Domain (Optional)
 
 1. Go to Project Settings > Domains
-2. Add your custom domain (e.g., `llmrefs.com`)
+2. Add your custom domain (e.g., `llmscm.com`)
 3. Configure DNS with provided records
 
 ---
@@ -104,7 +104,7 @@ CELERY_BROKER_URL=${{Redis.REDIS_URL}}
 CELERY_RESULT_BACKEND=${{Redis.REDIS_URL}}
 
 # CORS
-CORS_ORIGINS=https://llmrefs.com,https://www.llmrefs.com
+CORS_ORIGINS=https://llmscm.com,https://www.llmscm.com
 ```
 
 ### Step 4: Deploy Celery Worker
@@ -136,7 +136,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://llmrefs:password@db:5432/llmrefs
+      - DATABASE_URL=postgresql://llmscm:password@db:5432/llmscm
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
@@ -151,7 +151,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.workers.celery_app worker --loglevel=info
     environment:
-      - DATABASE_URL=postgresql://llmrefs:password@db:5432/llmrefs
+      - DATABASE_URL=postgresql://llmscm:password@db:5432/llmscm
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
@@ -166,7 +166,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.workers.celery_app beat --loglevel=info
     environment:
-      - DATABASE_URL=postgresql://llmrefs:password@db:5432/llmrefs
+      - DATABASE_URL=postgresql://llmscm:password@db:5432/llmscm
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
@@ -189,9 +189,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=llmrefs
+      - POSTGRES_USER=llmscm
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=llmrefs
+      - POSTGRES_DB=llmscm
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

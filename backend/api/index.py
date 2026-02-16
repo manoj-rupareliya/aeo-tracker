@@ -1,5 +1,5 @@
 """
-Vercel Serverless Entry Point for llmrefs.com API
+Vercel Serverless Entry Point for llmscm.com API
 Using Mangum for ASGI to AWS Lambda adapter
 """
 from fastapi import FastAPI
@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 app = FastAPI(
-    title="llmrefs.com API",
+    title="llmscm.com API",
     description="LLM Visibility & Citation Intelligence Platform",
     version="1.0.0",
     docs_url="/docs",
@@ -25,7 +25,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "name": "llmrefs.com API",
+        "name": "llmscm.com API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs"

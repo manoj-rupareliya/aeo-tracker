@@ -1,5 +1,5 @@
 """
-Configuration management for llmrefs.com
+Configuration management for llmscm.com
 Environment-based settings with secure defaults
 """
 
@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
 
     # Application
-    APP_NAME: str = "llmrefs"
+    APP_NAME: str = "llmscm"
     APP_ENV: str = "development"  # development, staging, production
     DEBUG: bool = False
     API_VERSION: str = "v1"
@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
     PERPLEXITY_API_KEY: Optional[str] = None
+
+    # SERP API Keys (for Google AI Overview tracking)
+    SERPER_API_KEY: Optional[str] = None  # serper.dev API key
 
     # LLM Default Models
     OPENAI_DEFAULT_MODEL: str = "gpt-4-turbo"

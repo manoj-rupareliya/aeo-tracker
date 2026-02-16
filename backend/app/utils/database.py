@@ -23,9 +23,39 @@ def _get_database_url() -> str:
     """Get and convert database URL for async"""
     settings = get_settings()
     database_url = settings.DATABASE_URL
+
+    # Convert to async driver
     if database_url.startswith("postgresql://"):
         database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    # asyncpg doesn't use sslmode, it uses ssl parameter
+    # Remove sslmode and ssl query params - we'll handle SSL via connect_args
+    if "?" in database_url:
+        base_url, params = database_url.split("?", 1)
+        param_list = params.split("&")
+        filtered_params = [p for p in param_list if not p.startswith(("sslmode=", "ssl="))]
+        if filtered_params:
+            database_url = f"{base_url}?{'&'.join(filtered_params)}"
+        else:
+            database_url = base_url
+
     return database_url
+
+
+def _get_connect_args() -> dict:
+    """Get connection arguments for asyncpg including SSL"""
+    settings = get_settings()
+    connect_args = {}
+
+    # Check if SSL is needed (Neon, Supabase, etc. require SSL)
+    if "neon.tech" in settings.DATABASE_URL or "supabase" in settings.DATABASE_URL:
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        connect_args["ssl"] = ssl_context
+
+    return connect_args
 
 
 def _is_serverless() -> bool:
@@ -52,6 +82,7 @@ def _get_engine():
 
         _engine = create_async_engine(
             _get_database_url(),
+            connect_args=_get_connect_args(),
             **engine_kwargs
         )
     return _engine

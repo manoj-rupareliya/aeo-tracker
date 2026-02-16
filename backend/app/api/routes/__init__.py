@@ -17,6 +17,8 @@ from .graph import router as graph_router
 from .recommendations import router as recommendations_router
 from .saiv import router as saiv_router
 from .cost import router as cost_router
+from .visibility import router as visibility_router
+from .aio import router as aio_router
 
 api_router = APIRouter()
 
@@ -33,3 +35,5 @@ api_router.include_router(graph_router, prefix="/graph", tags=["Preference Graph
 api_router.include_router(recommendations_router, prefix="/recommendations", tags=["GEO Recommendations"])
 api_router.include_router(saiv_router, prefix="/saiv", tags=["Share of AI Voice"])
 api_router.include_router(cost_router, prefix="/cost", tags=["Cost Governance"])
+api_router.include_router(visibility_router, prefix="/visibility", tags=["Visibility Analytics"])
+api_router.include_router(aio_router, prefix="/aio", tags=["Google AI Overview"])

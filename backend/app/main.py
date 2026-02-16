@@ -1,5 +1,5 @@
 """
-llmrefs.com - LLM Visibility & Citation Intelligence Platform
+llmscm.com - LLM Visibility & Citation Intelligence Platform
 Main FastAPI Application
 """
 
@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     application = FastAPI(
-        title="llmrefs.com API",
+        title="llmscm.com API",
         description="""
         LLM Visibility & Citation Intelligence Platform
 
@@ -89,6 +89,10 @@ def create_app() -> FastAPI:
     from app.api.routes import api_router
     application.include_router(api_router, prefix="/api/v1")
 
+    # Import and include Admin dashboard routes
+    from app.admin import admin_router
+    application.include_router(admin_router, prefix="/admin", tags=["admin"])
+
     # Health check
     @application.get("/health")
     async def health_check():
@@ -106,7 +110,7 @@ def create_app() -> FastAPI:
         """Root endpoint"""
         settings = get_settings()
         return {
-            "name": "llmrefs.com API",
+            "name": "llmscm.com API",
             "version": "1.0.0",
             "docs": "/docs" if settings.is_development else "/docs",
         }

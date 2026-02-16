@@ -1,20 +1,20 @@
-# Render.com Blueprint for llmrefs.com Backend
+# Render.com Blueprint for llmscm.com Backend
 # Deploy with: https://render.com/deploy
 
 services:
   - type: web
-    name: llmrefs-api
+    name: llmscm-api
     runtime: docker
     dockerfilePath: ./Dockerfile
     envVars:
       - key: APP_ENV
         value: production
+      - key: DEBUG
+        value: false
       - key: PORT
         value: 8000
       - key: DATABASE_URL
-        fromDatabase:
-          name: llmrefs-db
-          property: connectionString
+        sync: false  # Set manually in Render dashboard
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
@@ -23,11 +23,10 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://frontend-sigma-three-40.vercel.app,http://localhost:3000
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: SERPER_API_KEY
+        sync: false  # Set manually in Render dashboard
     healthCheckPath: /health
-    plan: free
-    region: oregon
-
-databases:
-  - name: llmrefs-db
     plan: free
     region: oregon
