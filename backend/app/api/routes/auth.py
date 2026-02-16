@@ -32,32 +32,46 @@ async def register(
     db: AsyncSession = Depends(get_db),
 ):
     """Register a new user"""
-    # Check if email already exists
-    result = await db.execute(
-        select(User).where(User.email == user_data.email)
-    )
-    if result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+    import logging
+    logging.info(f"Registration attempt for email: {user_data.email}")
+
+    try:
+        # Check if email already exists
+        result = await db.execute(
+            select(User).where(User.email == user_data.email)
         )
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
 
-    # Create user with default subscription tier
-    user = User(
-        email=user_data.email,
-        password_hash=hash_password(user_data.password),
-        full_name=user_data.full_name,
-        subscription_tier=SubscriptionTier.FREE,
-        monthly_token_limit=100000,
-        tokens_used_this_month=0,
-        is_active=True,
-        is_verified=False,
-    )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+        # Create user with default subscription tier
+        user = User(
+            email=user_data.email,
+            password_hash=hash_password(user_data.password),
+            full_name=user_data.full_name,
+            subscription_tier=SubscriptionTier.FREE,
+            monthly_token_limit=100000,
+            tokens_used_this_month=0,
+            is_active=True,
+            is_verified=False,
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
 
-    return user
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Registration error: {e}")
+        import traceback
+        logging.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}",
+        )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -66,37 +80,51 @@ async def login(
     db: AsyncSession = Depends(get_db),
 ):
     """Authenticate and get tokens"""
-    # Find user
-    result = await db.execute(
-        select(User).where(User.email == credentials.email)
-    )
-    user = result.scalar_one_or_none()
+    import logging
+    logging.info(f"Login attempt for email: {credentials.email}")
 
-    if not user or not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+    try:
+        # Find user
+        result = await db.execute(
+            select(User).where(User.email == credentials.email)
         )
+        user = result.scalar_one_or_none()
 
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is disabled",
+        if not user or not verify_password(credentials.password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is disabled",
+            )
+
+        # Update last login
+        user.last_login_at = datetime.utcnow()
+        await db.commit()
+
+        # Generate tokens
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
-
-    # Update last login
-    user.last_login_at = datetime.utcnow()
-    await db.commit()
-
-    # Generate tokens
-    access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id)
-
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        expires_in=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Login error: {e}")
+        import traceback
+        logging.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}",
+        )
 
 
 @router.post("/refresh", response_model=TokenResponse)
