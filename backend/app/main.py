@@ -71,18 +71,19 @@ def create_app() -> FastAPI:
     @application.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         """Handle unexpected errors"""
+        import traceback
+        import logging
+        logging.error(f"Unhandled exception: {exc}")
+        logging.error(traceback.format_exc())
+
         settings = get_settings()
-        if settings.DEBUG:
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "detail": str(exc),
-                    "type": type(exc).__name__,
-                },
-            )
+        # Always show detailed errors for now to debug production issues
         return JSONResponse(
             status_code=500,
-            content={"detail": "Internal server error"},
+            content={
+                "detail": str(exc),
+                "type": type(exc).__name__,
+            },
         )
 
     # Import and include API routes
