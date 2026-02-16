@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User, UserAPIKey, LLMProvider
+from app.models import User, UserAPIKey, LLMProvider, SubscriptionTier
 from app.schemas.auth import (
     UserCreate, UserLogin, UserResponse, TokenResponse, TokenRefresh
 )
@@ -42,11 +42,16 @@ async def register(
             detail="Email already registered",
         )
 
-    # Create user
+    # Create user with default subscription tier
     user = User(
         email=user_data.email,
         password_hash=hash_password(user_data.password),
         full_name=user_data.full_name,
+        subscription_tier=SubscriptionTier.FREE,
+        monthly_token_limit=100000,
+        tokens_used_this_month=0,
+        is_active=True,
+        is_verified=False,
     )
     db.add(user)
     await db.commit()
